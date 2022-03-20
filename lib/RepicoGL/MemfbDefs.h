@@ -6,13 +6,13 @@
 #define PICOGL_TEST_MEMFBDEFS_H
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-void *getFrameBuffer();
-
-size_t sizeOfFrameBuffer();
-
+#include <stdlib.h>
+    void *getFrameBuffer(void);
+    size_t sizeOfFrameBuffer();
 #ifdef __cplusplus
 }
 #endif

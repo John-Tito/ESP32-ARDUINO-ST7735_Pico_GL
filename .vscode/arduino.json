@@ -1,0 +1,7 @@
+{
+    "sketch": "PicoGL.ino",
+    "port": "COM7",
+    "board": "esp32:esp32:ttgo-t8-v18",
+    "configuration": "PartitionScheme=default,FlashMode=qio,FlashFreq=40,UploadSpeed=921600,DebugLevel=info",
+    "output": "build"
+}

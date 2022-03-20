@@ -13,11 +13,11 @@ ZBuffer *ZB_open(int xsize, int ysize, int mode,
                  unsigned char *color_indexes,
                  int *color_table,
                  void *frame_buffer) {
-    
-    
+
+
     ZBuffer *zb;
     int size;
-    
+
     fmt->println("info: zbuffer.cpp: start ZB_open");
 
     zb = (ZBuffer *) gl_malloc(sizeof(ZBuffer));
@@ -25,8 +25,8 @@ ZBuffer *ZB_open(int xsize, int ysize, int mode,
         fmt->println("error: zbuffer.cpp: cannot alloc space for zb");
         return NULL;
     }
-    
-    fmt->printf("debug: zbuffer.cpp: create zb space at %x\n", zb);
+
+    fmt->printf("debug: zbuffer.cpp: create zb space at %x\n", (unsigned int)(zb));
 
     zb->xsize = xsize;
     zb->ysize = ysize;
@@ -57,7 +57,7 @@ ZBuffer *ZB_open(int xsize, int ysize, int mode,
     zb->zbuf = (short unsigned int *) gl_malloc(size);
     if (zb->zbuf == NULL) {
         fmt->println("error: zbuffer.cpp: cannot alloc space for zb of zbuffer!");
-        
+
         goto error;
     }
 

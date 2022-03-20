@@ -8,7 +8,8 @@
 #include "glx_impl.h"
 #include "debugger.h"
 
-struct TinyFBDevGLXContext {
+struct TinyFBDevGLXContext
+{
     GLContext *gl_context; /* base class */
     void *screen;
     ZBuffer *zb; // 绘制用buffer
@@ -17,12 +18,12 @@ struct TinyFBDevGLXContext {
     unsigned char *indexes;
 };
 
-
 /* Create context */
-FBDevGLXContext *fbdev_glXCreateContext() {
+FBDevGLXContext *fbdev_glXCreateContext()
+{
     FBDevGLXContext *ctx;
 
-    ctx = (FBDevGLXContext *) malloc(sizeof(FBDevGLXContext));
+    ctx = (FBDevGLXContext *)malloc(sizeof(FBDevGLXContext));
     if (ctx == NULL)
         return NULL;
 
@@ -34,8 +35,10 @@ FBDevGLXContext *fbdev_glXCreateContext() {
 }
 
 /*! Destroy context */
-void fbdev_glXDestroyContext(FBDevGLXContext *ctx) {
-    if (ctx->gl_context != NULL) {
+void fbdev_glXDestroyContext(FBDevGLXContext *ctx)
+{
+    if (ctx->gl_context != NULL)
+    {
         glClose();
     }
 
@@ -45,12 +48,13 @@ void fbdev_glXDestroyContext(FBDevGLXContext *ctx) {
 /* resize the glx viewport */
 static int glX_resize_viewport(GLContext *c,
                                int *xsize_ptr,
-                               int *ysize_ptr) {
+                               int *ysize_ptr)
+{
     FBDevGLXContext *ctx;
     int xsize;
     int ysize;
 
-    ctx = (FBDevGLXContext *) c->opaque;
+    ctx = (FBDevGLXContext *)c->opaque;
 
     xsize = *xsize_ptr;
     ysize = *ysize_ptr;
@@ -71,77 +75,83 @@ static int glX_resize_viewport(GLContext *c,
     return 0;
 }
 
-
 /* we assume here that drawable is a buffer */
-int fbdev_glXMakeCurrent(FBDevGLXContext *ctx) {
+int fbdev_glXMakeCurrent(FBDevGLXContext *ctx)
+{
     int mode;
     int xsize;
     int ysize;
     int n_colors = 0;
     int bpp;
     int line_length;
-    ZBuffer *zb;
+    ZBuffer *zb = NULL;
     extern void *FrameBuffer;
 
-    if (ctx->gl_context == NULL) {
+    if (ctx->gl_context == NULL)
+    {
         fmt->println("info:glx.cpp: start make gl_context");
-        
+
         /* create the PicoGL context */
         xsize = SCREEN_WIDTH;
         ysize = SCREEN_HEIGHT;
         bpp = SCREEN_BITS_PER_PIXEL;
 
         line_length = SCREEN_WIDTH;
-        switch (bpp) {
-            case 8:
-                ctx->indexes =
-                        (unsigned char *) malloc(ZB_NB_COLORS);
-                if (ctx->indexes == NULL)
-                    return 0;
-                for (mode = 0; mode < ZB_NB_COLORS ;mode++)
-                    ctx->indexes[mode] = mode;
+        switch (bpp)
+        {
+        case 8:
+            ctx->indexes =
+                (unsigned char *)malloc(ZB_NB_COLORS);
+            if (ctx->indexes == NULL)
+                return 0;
+            for (mode = 0; mode < ZB_NB_COLORS; mode++)
+                ctx->indexes[mode] = mode;
 
-                ctx->palette =
-                        (unsigned int *) calloc(
-                                ZB_NB_COLORS,
-                                sizeof(int));
-                if (ctx->palette == NULL) {
-                    free(ctx->indexes);
-                    ctx->indexes = NULL;
-                    return 0;
-                }
+            ctx->palette =
+                (unsigned int *)calloc(
+                    ZB_NB_COLORS,
+                    sizeof(int));
+            if (ctx->palette == NULL)
+            {
+                free(ctx->indexes);
+                ctx->indexes = NULL;
+                return 0;
+            }
 
-                line_length = line_length * 2;
-                n_colors = ZB_NB_COLORS;
-                mode = ZB_MODE_INDEX;
-                break;
-            case 16:
-                line_length = line_length * 2;
-                mode = ZB_MODE_5R6G5B;
-                break;
-            case 32:
-                mode = ZB_MODE_RGBA;
-                break;
-            case 24:
-                line_length = (line_length * 2) / 3;
-                mode = ZB_MODE_RGB24;
-                break;
-            default:
-                mode = ZB_MODE_5R6G5B;
-                break;
+            line_length = line_length * 2;
+            n_colors = ZB_NB_COLORS;
+            mode = ZB_MODE_INDEX;
+            break;
+        case 16:
+            line_length = line_length * 2;
+            mode = ZB_MODE_5R6G5B;
+            break;
+        case 32:
+            mode = ZB_MODE_RGBA;
+            break;
+        case 24:
+            line_length = (line_length * 2) / 3;
+            mode = ZB_MODE_RGB24;
+            break;
+        default:
+            mode = ZB_MODE_5R6G5B;
+            break;
         }
-        
-        fmt->printf("debug:glx.cpp: start make zbuffer (%d, %d, %d, %d)\n", xsize, ysize, mode, n_colors);
-        
-        zb = ZB_open(xsize, ysize, mode, n_colors,
-                     (unsigned char*) ctx->indexes, (int *)ctx->palette, NULL);
 
-        if (zb == NULL) {
-            if (ctx->indexes != NULL) {
+        fmt->printf("debug:glx.cpp: start make zbuffer (%d, %d, %d, %d)\n", xsize, ysize, mode, n_colors);
+
+        zb = ZB_open(xsize, ysize, mode, n_colors,
+                     (unsigned char *)ctx->indexes, (int *)ctx->palette, NULL);
+
+        if (zb == NULL)
+        {
+            if (ctx->indexes != NULL)
+            {
                 free(ctx->indexes);
                 ctx->indexes = NULL;
             }
-            if (ctx->palette != NULL) {
+            if (ctx->palette != NULL)
+            {
                 free(ctx->palette);
                 ctx->palette = NULL;
             }
@@ -151,11 +161,11 @@ int fbdev_glXMakeCurrent(FBDevGLXContext *ctx) {
 
         /* initialisation of the TinyGL interpreter */
         glInit(zb);
-        
+
         ctx->gl_context = gl_get_context();
-        fmt->printf("info:glx.cpp: succ create gl_context at %x\n", ctx->gl_context);
-        
-        ctx->gl_context->opaque = (void *) ctx;
+        fmt->printf("info:glx.cpp: succ create gl_context at %x\n", (unsigned int)(ctx->gl_context));
+
+        ctx->gl_context->opaque = (void *)ctx;
         ctx->gl_context->gl_resize_viewport = glX_resize_viewport;
 
         /* set the viewport */
@@ -177,7 +187,8 @@ int fbdev_glXMakeCurrent(FBDevGLXContext *ctx) {
 int cnt = 0;
 
 /* Swap buffers */
-void fbdev_glXSwapBuffers(FBDevGLXContext *ctx) {
+void fbdev_glXSwapBuffers(FBDevGLXContext *ctx)
+{
     GLContext *gl_context;
 
     assert(ctx->gl_context);
@@ -185,12 +196,12 @@ void fbdev_glXSwapBuffers(FBDevGLXContext *ctx) {
     assert(ctx->zb);
 
     gl_context = gl_get_context();
-    ctx = (FBDevGLXContext *) gl_context->opaque;
+    ctx = (FBDevGLXContext *)gl_context->opaque;
 
     ZB_copyFrameBuffer(ctx->zb, ctx->screen, ctx->line_length);
 }
 
-int fbdev_getLineLength(FBDevGLXContext *ctx) {
+int fbdev_getLineLength(FBDevGLXContext *ctx)
+{
     return ctx->line_length;
 }
-

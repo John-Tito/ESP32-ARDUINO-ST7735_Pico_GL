@@ -1,0 +1,42 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"search.exclude": {
+			"**/node_modules": true,
+			"**/bower_components": true,
+			"**/*.code-search": true,
+			"build": true
+		},
+		"files.exclude": {
+			"**/.git": true,
+			"**/.svn": true,
+			"**/.hg": true,
+			"**/CVS": true,
+			"**/.DS_Store": true,
+			"**/Thumbs.db": true,
+			"build": true
+		},
+		"files.associations": {
+			"*.c": "c",
+			"*.h": "c",
+			"*.sdc": "tcl",
+			"*.qsf": "tcl",
+			"*.md": "markdown",
+			"*.vhd": "vhdl",
+			"*.vht": "vhdl",
+			"*.v": "verilog",
+			"*.vt": "verilog",
+			"*.py": "python",
+			"*.tcl": "xdc",
+			"*.cmp": "vhdl",
+			"*.bak": "vhdl",
+			"*.S": "c",
+			"*.ino": "cpp",
+			"*.tcc": "cpp"
+		}
+	}
+}

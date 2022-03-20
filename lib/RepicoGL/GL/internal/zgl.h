@@ -71,7 +71,7 @@ typedef struct GLLight {
   V4 ambient;
   V4 diffuse;
   V4 specular;
-  V4 position;	
+  V4 position;
   V3 spot_direction;
   GLfloat spot_exponent;
   GLfloat spot_cutoff;
@@ -94,7 +94,7 @@ typedef struct GLMaterial {
 
   /* computed values */
   int shininess_i;
-  int do_specular;  
+  int do_specular;
 } GLMaterial;
 
 
@@ -129,7 +129,7 @@ typedef struct GLVertex {
   V4 coord;
   V4 tex_coord;
   V4 color;
-  
+
   /* computed values */
   V4 ec;                /* eye coordinates */
   V4 pc;                /* coordinates in the normalized volume */
@@ -207,7 +207,7 @@ typedef struct GLContext {
   M4 matrix_model_view_inv;
   M4 matrix_model_projection;
   int matrix_model_projection_updated;
-  int matrix_model_projection_no_w_transform; 
+  int matrix_model_projection_no_w_transform;
   int apply_texture_matrix;
 
   /* viewport */
@@ -267,13 +267,13 @@ typedef struct GLContext {
   int texcoord_array_size;
   int texcoord_array_stride;
   int client_states;
-  
+
   /* opengl 1.1 polygon offset */
   GLfloat offset_factor;
   GLfloat offset_units;
   int offset_states;
-  
-  /* specular buffer. could probably be shared between contexts, 
+
+  /* specular buffer. could probably be shared between contexts,
     but that wouldn't be 100% thread safe */
   GLSpecBuf *specbuf_first;
   int specbuf_used_counter;
@@ -334,11 +334,11 @@ void gl_resizeImageNoInterpolate(unsigned char *dest,int xsize_dest,int ysize_de
 
 GLContext *gl_get_context(void);
 
-void gl_fatal_error(char *format, ...);
+void gl_fatal_error(const char *format, ...);
 
 
 /* specular buffer "api" */
-GLSpecBuf *specbuf_get_buffer(GLContext *c, const int shininess_i, 
+GLSpecBuf *specbuf_get_buffer(GLContext *c, const int shininess_i,
                               const GLfloat shininess);
 
 #ifdef __BEOS__
@@ -381,7 +381,7 @@ static inline int gl_clipcode(GLfloat x,GLfloat y,GLfloat z,GLfloat w1)
     ((x>w)<<1) |
     ((y<sllneg(w))<<2) |
     ((y>w)<<3) |
-    ((z<sllneg(w))<<4) | 
+    ((z<sllneg(w))<<4) |
     ((z>w)<<5) ;
 #else
   	return 0;
