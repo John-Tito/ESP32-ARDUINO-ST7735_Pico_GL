@@ -5,24 +5,9 @@
 		}
 	],
 	"settings": {
-		"search.exclude": {
-			"**/node_modules": true,
-			"**/bower_components": true,
-			"**/*.code-search": true,
-			"build": true
-		},
-		"files.exclude": {
-			"**/.git": true,
-			"**/.svn": true,
-			"**/.hg": true,
-			"**/CVS": true,
-			"**/.DS_Store": true,
-			"**/Thumbs.db": true,
-			"build": true
-		},
 		"files.associations": {
-			"*.c": "c",
-			"*.h": "c",
+			"*.c": "cpp",
+			"*.h": "cpp",
 			"*.sdc": "tcl",
 			"*.qsf": "tcl",
 			"*.md": "markdown",
@@ -35,8 +20,27 @@
 			"*.cmp": "vhdl",
 			"*.bak": "vhdl",
 			"*.S": "c",
-			"*.ino": "cpp",
+			"*.inc": "plaintext",
+			"array": "cpp",
+			"deque": "cpp",
+			"string": "cpp",
+			"unordered_map": "cpp",
+			"vector": "cpp",
+			"string_view": "cpp",
+			"initializer_list": "cpp",
+			"regex": "cpp",
 			"*.tcc": "cpp"
+		},
+		"files.exclude": {
+			"**/.git": true,
+			"**/.svn": true,
+			"**/.hg": true,
+			"**/CVS": true,
+			"**/.DS_Store": true,
+			".pio/build": true
+		},
+		"C_Cpp.files.exclude": {
+			"**/.vscode": true
 		}
 	}
 }

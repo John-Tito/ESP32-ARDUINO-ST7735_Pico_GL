@@ -1,3 +1,4 @@
+
 /* gears.c */
 
 /*
@@ -5,49 +6,26 @@
  *
  * Brian Paul
  */
-
-#include <SPI.h>
-#include <math.h>
-#include <stdlib.h>
-
 #include "MemfbDefs.h"
-#include "debugger.h"
-#include "picotk.h"
 #include <GL/gl.h>
+#include <TFT_eSPI.h>
+#include <gear.hpp>
 
 #ifndef M_PI
 #define M_PI 3.14159265
 #endif
 
-#ifndef TFT_DISPOFF
-#define TFT_DISPOFF 0x28
-#endif
+TFT_eSPI tft1 = TFT_eSPI(); // Invoke custom library
 
-#ifndef TFT_SLPIN
-#define TFT_SLPIN 0x10
-#endif
+static const uint32_t screenWidth = 130;
+static const uint32_t screenHeight = 130;
 
-#define TFT_MOSI 19
-#define TFT_SCLK 18
-#define TFT_CS 5
-#define TFT_DC 16
-#define TFT_RST 23
+HardwareSerial *fmt = &Serial;
+uint16_t color = 0xf0f0;
 
-#define TFT_BL 4 // Display backlight control pin
-#define ADC_EN 14
-#define ADC_PIN 34
-#define BUTTON_1 35
-#define BUTTON_2 0
-
-TFT_eSPI tft = TFT_eSPI(135, 240);
-
-/*
- *
- * glx.c、glx_impl.h、screen_config.h、tk.c
- * 头文件 MemfbDefs 定义了相关的头
- * 默认的 framebuffer 的颜色格式是 16 位 RGB也就是 RGB565
- * 在 zfeature.h 可以调整输入输出的颜色模式，不过不建议更改。
-*/
+static GLfloat view_rotx = 20.0, view_roty = 30.0, view_rotz = 0.0;
+static GLint gear1, gear2, gear3;
+static GLfloat angle = 0.0;
 
 /*
  * Draw a gear wheel.  You'll probably want to call this function when
@@ -177,15 +155,21 @@ static void gear(GLfloat inner_radius, GLfloat outer_radius, GLfloat width,
     glEnd();
 }
 
-static GLfloat view_rotx = 20.0, view_roty = 30.0, view_rotz = 0.0;
-static GLint gear1, gear2, gear3;
-static GLfloat angle = 0.0;
-
-static GLuint limit;
-static GLuint count = 1;
-
-void draw(void)
+inline void monitor_init(void)
 {
+    tft1.init();
+    tft1.initDMA(true);
+    tft1.setCursor(1, 1);
+}
+
+inline void monitor_push(void)
+{
+    tft1.pushImageDMA(1, 1, screenWidth, screenHeight, (uint16_t *)getFrameBuffer(), NULL);
+}
+
+int scene_update(void)
+{
+    angle += 2.0;
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glPushMatrix();
@@ -215,64 +199,18 @@ void draw(void)
 
     tkSwapBuffers();
 
-    count++;
-    if (count == limit)
-    {
-        exit(0);
-    }
+    monitor_push();
+    return 0;
 }
 
-/* change view angle, exit upon ESC */
-GLenum key(int k, GLenum mask)
-{
-    switch (k)
-    {
-    case KEY_UP:
-        view_rotx += 5.0;
-        return GL_TRUE;
-    case KEY_DOWN:
-        view_rotx -= 5.0;
-        return GL_TRUE;
-    case KEY_LEFT:
-        view_roty += 5.0;
-        return GL_TRUE;
-    case KEY_RIGHT:
-        view_roty -= 5.0;
-        return GL_TRUE;
-    case 'z':
-        view_rotz += 5.0;
-        return GL_TRUE;
-    case 'Z':
-        view_rotz -= 5.0;
-        return GL_TRUE;
-    case KEY_ESCAPE:
-        exit(0);
-    }
-    return GL_FALSE;
-}
-
-/* new window size or exposure */
-void reshape(int width, int height)
-{
-    GLfloat h = (GLfloat)height / (GLfloat)width;
-
-    glViewport(0, 0, (GLint)width, (GLint)height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glFrustum(-1.0, 1.0, -h, h, 5.0, 60.0);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glTranslatef(0.0, 0.0, -40.0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
-
-void picotk_init(void)
+int scene_init(void)
 {
     static GLfloat pos[4] = {5.0, 5.0, 10.0, 0.0};
     static GLfloat red[4] = {0.8, 0.1, 0.0, 1.0};
     static GLfloat green[4] = {0.0, 0.8, 0.2, 1.0};
     static GLfloat blue[4] = {0.2, 0.2, 1.0, 1.0};
 
+    monitor_init();
     Serial.println("Start picotk_init");
 
     glLightfv(GL_LIGHT0, GL_POSITION, pos);
@@ -306,47 +244,6 @@ void picotk_init(void)
     glEndList();
 
     glEnable(GL_NORMALIZE);
-}
 
-int frameCnt = 0;
-
-void idle(void)
-{
-    Serial.println("info: start frame draw");
-    angle += 2.0;
-    draw();
-    Serial.printf("info: success draw frame[%d]\n", frameCnt++);
-    tft.pushImage(0, 0, 200, 132, (uint8_t *)getFrameBuffer());
-    Serial.println("info: frame pushed");
-}
-
-HardwareSerial *fmt = &Serial;
-
-void setup()
-{
-    Serial.begin(115200);
-    Serial.println("Start");
-    tft.init();
-    tft.setCursor(0, 0);
-
-    if (TFT_BL > 0)
-    {                                           // TFT_BL has been set in the TFT_eSPI library in the User Setup file TTGO_T_Display.h
-        pinMode(TFT_BL, OUTPUT);                // Set backlight pin to output mode
-        digitalWrite(TFT_BL, TFT_BACKLIGHT_ON); // Turn backlight on. TFT_BACKLIGHT_ON has been set in the TFT_eSPI library in the User Setup file TTGO_T_Display.h
-    }
-
-    tft.setRotation(3);
-    tft.fillScreen(TFT_BLACK);
-    tft.setSwapBytes(true);
-}
-
-void loop()
-{
-    //
-    Serial.println("Start looping!");
-    int ret = ui_loop(0, NULL, "");
-    if (ret != 0)
-    {
-        Serial.printf("error: ui_loop unexpected end with code %d!\n", ret);
-    }
+    return 0;
 }
