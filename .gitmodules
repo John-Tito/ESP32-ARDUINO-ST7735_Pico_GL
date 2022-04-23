@@ -1,0 +1,3 @@
+[submodule "lib/RepicoGL"]
+	path = lib/RepicoGL
+	url = git@gitee.com:john_tito/RepicoGL.git
