@@ -1,3 +1,6 @@
 [submodule "lib/RepicoGL"]
 	path = lib/RepicoGL
 	url = git@gitee.com:john_tito/RepicoGL.git
+[submodule "lib/TFT_eSPI"]
+	path = lib/TFT_eSPI
+	url = https://github.com/Bodmer/TFT_eSPI.git
