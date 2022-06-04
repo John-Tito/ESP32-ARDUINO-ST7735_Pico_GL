@@ -1,3 +1,4 @@
 .pio/build
-**/example
 .vscode
+*.code-workspace
+workspace.code-workspace
